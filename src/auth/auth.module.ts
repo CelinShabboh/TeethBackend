@@ -15,19 +15,19 @@ import { User } from 'src/entities/user.entity';
 // import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
-  providers: [AuthService, UserService, LocalUserStrategy, DoctorService,LocalDoctorStrategy],
+  providers: [AuthService, UserService, LocalUserStrategy, DoctorService, LocalDoctorStrategy],
   controllers: [AuthController],
   exports: [AuthService],
   imports: [
     UserModule,
     PassportModule,
     DoctorModule,
-    TypeOrmModule.forFeature([Doctor,User]),
+    TypeOrmModule.forFeature([Doctor, User]),
     JwtModule.register({
       global: true,
       secret: `${process.env.jwt_secret}`, //jwt_secret=secretjwt4565
-      signOptions: { expiresIn: '360s' },
+      signOptions: { expiresIn: '7d' },
     }),
   ],
 })
-export class AuthModule {}
+export class AuthModule { }
