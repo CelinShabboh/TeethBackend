@@ -1,24 +1,14 @@
-import {
-  Body,
-  Controller,
-  Post,
-} from '@nestjs/common';
-import { CreateUserDto } from './dto/createUserDto';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
+import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // @Get('all')
-  // findAll() {
-  //   return 'all users';
-  // }
-  // @Get(':id')
-  // findOne(@Param('id') id: number) {
-  //   return this.userService.findOne(id);
-  //   };
-
- 
-
+  @UseGuards(JwtGuard)
+  @Get(':id')
+  findOne(@Param('id') id: number) {
+    return `osama + ${id}`;
+  }
 }

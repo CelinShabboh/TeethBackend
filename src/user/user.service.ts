@@ -11,7 +11,7 @@ export class UserService {
     private dataSource: DataSource,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<{ message: string }> {
     const { name, phone } = createUserDto;
 
     // بداية المعاملة
@@ -31,14 +31,16 @@ export class UserService {
 
       if (conflicts.length > 0) {
         await queryRunner.rollbackTransaction();
-        throw new ConflictException('A user with the same name or phone already exists.');
+        throw new ConflictException(
+          'A user with the same name or phone already exists.',
+        );
       }
 
       const newUser = queryRunner.manager.create(User, createUserDto);
       await queryRunner.manager.save(newUser);
 
       await queryRunner.commitTransaction();
-      return newUser;
+      return { message: 'successfully registered' };
     } catch (err) {
       if (queryRunner.isTransactionActive) {
         await queryRunner.rollbackTransaction();
@@ -48,9 +50,6 @@ export class UserService {
       await queryRunner.release();
     }
   }
-
-
-
 
   async findOne(phone: string): Promise<User | undefined> {
     return await this.userRepository.findOne({ where: { phone } });

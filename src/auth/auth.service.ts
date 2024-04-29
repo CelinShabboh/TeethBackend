@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DoctorService } from 'src/doctor/doctor.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -30,16 +30,64 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User): Promise<{ access_token: string }> {
-    const payload = { sub: user.id, username: user.name };
+  async login(user: User) {
+    const user_info = {
+      id: user.id,
+      username: user.name,
+      phone: user.phone,
+      governorate: user.governorate,
+    };
+    const tokens = {
+      access_token: await this.jwtService.signAsync(user_info),
+      refresh_token: this.jwtService.sign(user_info, { expiresIn: '30d' }),
+    };
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      user_info,
+      tokens,
     };
   }
-  async signin(doctor: Doctor): Promise<{ access_token: string }> {
-    const payload = { sub: doctor.id, username: doctor.name };
+  async signin(doctor: Doctor) {
+    const doctor_info = {
+      id: doctor.id,
+      username: doctor.name,
+      email: doctor.email,
+      phone: doctor.phone,
+      governorate: doctor.governorate,
+      university: doctor.university,
+      collegeyear: doctor.collegeyear,
+    };
+    const tokens = {
+      access_token: await this.jwtService.signAsync(doctor_info),
+      refresh_token: this.jwtService.sign(doctor_info, { expiresIn: '30d' }),
+    };
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      doctor_info,
+      tokens,
+    };
+  }
+  async refreshTokenDoctor(doctor: Doctor) {
+    const doctor_info = {
+      id: doctor.id,
+      username: doctor.name,
+      email: doctor.email,
+      phone: doctor.phone,
+      governorate: doctor.governorate,
+      university: doctor.university,
+      collegeyear: doctor.collegeyear,
+    };
+    return {
+      access_token: await this.jwtService.signAsync(doctor_info, { expiresIn: '30d' }),
+    };
+  }
+  async refreshTokenUser(user: User) {
+    const user_info = {
+      id: user.id,
+      username: user.name,
+      phone: user.phone,
+      governorate: user.governorate,
+    };
+    return {
+      access_token: await this.jwtService.signAsync(user_info ,{ expiresIn: '30d' }),
     };
   }
 }

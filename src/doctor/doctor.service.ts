@@ -15,7 +15,7 @@ export class DoctorService {
     private dataSource: DataSource,
   ) {}
 
-  async create(createDoctorDto: CreateDoctorDto): Promise<Doctor> {
+  async create(createDoctorDto: CreateDoctorDto): Promise<{ message: string }> {
     const { email, name, phone } = createDoctorDto;
 
     // بداية المعاملة
@@ -33,18 +33,24 @@ export class DoctorService {
         UNION
         SELECT 1 FROM users WHERE name = $2 OR phone = $3
       `;
-      const conflicts = await queryRunner.query(conflictQuery, [email, name, phone]);
+      const conflicts = await queryRunner.query(conflictQuery, [
+        email,
+        name,
+        phone,
+      ]);
 
       if (conflicts.length > 0) {
         await queryRunner.rollbackTransaction();
-        throw new ConflictException('An account with similar email, name, or phone already exists.');
+        throw new ConflictException(
+          'An account with similar email, name, or phone already exists.',
+        );
       }
 
       const newDoctor = queryRunner.manager.create(Doctor, createDoctorDto);
       await queryRunner.manager.save(newDoctor);
 
       await queryRunner.commitTransaction();
-      return newDoctor;
+      return { message: 'successfully registered' };
     } catch (err) {
       if (queryRunner.isTransactionActive) {
         await queryRunner.rollbackTransaction();
@@ -55,30 +61,12 @@ export class DoctorService {
     }
   }
 
-
-
-
-
-
   async findOne(email: string): Promise<Doctor | undefined> {
     return await this.doctorRepository.findOne({ where: { email } });
-    
   }
 
-
-
-
-
-
-
-
-
-
-
-  
   async deleteUser(id: number): Promise<any> {
     const result = await this.doctorRepository.delete(id);
     return result;
   }
-
 }

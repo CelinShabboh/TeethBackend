@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Request,
   UseGuards,
@@ -13,7 +14,7 @@ import { LocalUserAuthGuard } from './guards/localuser-auth.guard';
 import { LocalDoctorAuthGuard } from './guards/localdoctor-auth.guard';
 import { CreateUserDto } from 'src/user/dto/createUserDto';
 import { UserService } from 'src/user/user.service';
-// import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RefreshJwtGuard } from './guards/refresh-jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -41,8 +42,18 @@ export class AuthController {
   async signin(@Request() req) {
     return this.authService.signin(req.doctor);
   }
+  @UseGuards(RefreshJwtGuard)
+  @Post('doctor/refresh')
+  async refreshTokenDoctor(@Request() req) {
+    return this.authService.refreshTokenDoctor(req.user);
+  }
+  @UseGuards(RefreshJwtGuard)
+  @Post('user/refresh')
+  async refreshTokenUser(@Request() req) {
+    return this.authService.refreshTokenUser(req.user);
+  }
 
-  // @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtGuard)
   // @Get('profile')
   // getProfile(@Request() req) {
   //   return req.user;
