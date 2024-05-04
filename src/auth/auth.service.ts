@@ -39,7 +39,7 @@ export class AuthService {
     };
     const tokens = {
       access_token: await this.jwtService.signAsync(user_info),
-      refresh_token: this.jwtService.sign(user_info, { expiresIn: '30d' }),
+      refresh_token: this.jwtService.sign(user_info, { expiresIn: '120d' }),
     };
     return {
       user_info,
@@ -58,7 +58,7 @@ export class AuthService {
     };
     const tokens = {
       access_token: await this.jwtService.signAsync(doctor_info),
-      refresh_token: this.jwtService.sign(doctor_info, { expiresIn: '30d' }),
+      refresh_token: this.jwtService.sign(doctor_info, { expiresIn: '120d' }),
     };
     return {
       doctor_info,
@@ -76,7 +76,7 @@ export class AuthService {
       collegeyear: doctor.collegeyear,
     };
     return {
-      access_token: await this.jwtService.signAsync(doctor_info, { expiresIn: '30d' }),
+      access_token: await this.jwtService.signAsync(doctor_info, { expiresIn: '180d' }),
     };
   }
   async refreshTokenUser(user: User) {
@@ -87,7 +87,7 @@ export class AuthService {
       governorate: user.governorate,
     };
     return {
-      access_token: await this.jwtService.signAsync(user_info ,{ expiresIn: '30d' }),
+      access_token: await this.jwtService.signAsync(user_info ,{ expiresIn: '180d' }),
     };
   }
 }

@@ -36,7 +36,7 @@ import { JwtStrategy } from './strategies/jwt_strategy';
     JwtModule.register({
       global: true,
       secret: process.env.jwt_secret,
-      signOptions: { expiresIn: '300s', algorithm: 'HS256' },
+      signOptions: { expiresIn: '60s', algorithm: 'HS256' },
     }),
   ],
 })
