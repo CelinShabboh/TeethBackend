@@ -8,6 +8,7 @@ import { DoctorCondition } from 'src/entities/doctorCondition.entity';
 import { Condition } from 'src/entities/condition.entity';
 import { ConditionLevel } from 'src/entities/patientCondition.entity';
 import { DoctorSession } from 'src/entities/doctorSession.entity';
+import { User } from 'src/entities/user.entity';
 // import { MailerService } from 'src/mailer/mailer.service';
 
 @Module({
@@ -18,6 +19,7 @@ import { DoctorSession } from 'src/entities/doctorSession.entity';
       Condition,
       ConditionLevel,
       DoctorSession,
+      User,
     ]),
     forwardRef(() => UserModule),
   ],

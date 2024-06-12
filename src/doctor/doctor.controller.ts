@@ -8,9 +8,8 @@ import {
   Request,
 } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
-//import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
-import { ConditionSelectionArrayDoctorDto } from './dto/conditionSelectionDoctorDto';
-import { DoctorSessionDeleteDto } from './dto/doctorSessionDeleteDto';
+import { ConditionSelectionArrayDoctorDto } from 'src/doctor/dto/conditionSelectionDoctorDto';
+import { DoctorSessionDeleteDto } from 'src/doctor/dto/doctorSessionDeleteDto';
 import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
 
 @Controller('doctor')
@@ -50,5 +49,46 @@ export class DoctorController {
   @Delete('delete/:id')
   async deleteUser(@Param('id') userId: number): Promise<any> {
     return this.doctorService.deleteUser(userId);
+  }
+  @UseGuards(JwtGuard)
+  @Post('findUsersInSameGovernorate')
+  async findUsersInSameGovernorate(@Request() req) {
+    try {
+      const users = await this.doctorService.findMatchingUsersInSameGobernorate(
+        req.user.id,
+      );
+      return {
+        status: 'success',
+        data: users,
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        message: error.message,
+      };
+    }
+  }
+  @UseGuards(JwtGuard)
+  @Post('findUsersInOtherGovernorate')
+  async findUsersInOtherGovernorate(
+    @Request() req,
+    @Body('selectedGovernorate') selectedGovernorate: string,
+  ) {
+    try {
+      const users =
+        await this.doctorService.findMatchingUsersInOtherGobernorate(
+          req.user.id,
+          selectedGovernorate,
+        );
+      return {
+        status: 'success',
+        data: users,
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        message: error.message,
+      };
+    }
   }
 }

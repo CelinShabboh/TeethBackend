@@ -1,7 +1,7 @@
 import { Controller, Body, Post, UseGuards, Request } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ConditionSelectionArrayUserDto } from './dto/conditionSelectionUserDto';
-import { UserSessionDeleteDto } from './dto/userSessionDeleteDto';
+import { ConditionSelectionArrayUserDto } from 'src/user/dto/conditionSelectionUserDto';
+import { UserSessionDeleteDto } from 'src/user/dto/userSessionDeleteDto';
 import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
 
 @Controller('user')
@@ -33,5 +33,48 @@ export class UserController {
       message:
         ' The user session and related cases have been successfully deleted ',
     };
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('findDoctorsInSameGovernorate')
+  async findDoctorsInSameGovernorate(@Request() req) {
+    try {
+      const doctors =
+        await this.userService.findMatchingDoctorsInSameGobernorate(
+          req.user.id,
+        );
+      return {
+        status: 'success',
+        data: doctors,
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        message: error.message,
+      };
+    }
+  }
+  @UseGuards(JwtGuard)
+  @Post('findDoctorsInOtherGovernorate')
+  async findDoctorsInOtherGovernorate(
+    @Request() req,
+    @Body('selectedGovernorate') selectedGovernorate: string,
+  ) {
+    try {
+      const doctors =
+        await this.userService.findMatchingDoctorsInOtherGovernorate(
+          req.user.id,
+          selectedGovernorate,
+        );
+      return {
+        status: 'success',
+        data: doctors,
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        message: error.message,
+      };
+    }
   }
 }
