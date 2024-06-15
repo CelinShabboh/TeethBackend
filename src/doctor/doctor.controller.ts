@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { ConditionSelectionArrayDto } from 'src/dto/conditionSelectionDto';
-import { SessionDeleteDto } from 'src/dto/SessionDeleteDto';
+import { SessionDeleteDto } from 'src/dto/sessionDeleteDto';
 import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
 
 @Controller('doctor')
