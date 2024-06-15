@@ -1,7 +1,7 @@
 import { Controller, Body, Post, UseGuards, Request } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ConditionSelectionArrayUserDto } from 'src/user/dto/conditionSelectionUserDto';
-import { UserSessionDeleteDto } from 'src/user/dto/userSessionDeleteDto';
+import { ConditionSelectionArrayDto } from 'src/dto/conditionSelectionDto';
+import { SessionDeleteDto } from 'src/dto/SessionDeleteDto';
 import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
 
 @Controller('user')
@@ -11,7 +11,7 @@ export class UserController {
   @UseGuards(JwtGuard)
   @Post('chooseCondition')
   async chooseUserCondition(
-    @Body() conditionSelectionArrayUserDto: ConditionSelectionArrayUserDto,
+    @Body() conditionSelectionArrayUserDto: ConditionSelectionArrayDto,
     @Request() req: any,
   ) {
     const userSessionDTO = await this.userService.saveUserChoices(
@@ -25,7 +25,7 @@ export class UserController {
   @UseGuards(JwtGuard)
   @Post('deleteConditions')
   async deleteUserConditions(
-    @Body() userSessionDeleteDto: UserSessionDeleteDto,
+    @Body() userSessionDeleteDto: SessionDeleteDto,
     @Request() req: any,
   ): Promise<any> {
     await this.userService.deleteUserSession(userSessionDeleteDto, req.user.id);

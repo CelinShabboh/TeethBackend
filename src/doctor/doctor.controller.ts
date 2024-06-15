@@ -8,8 +8,8 @@ import {
   Request,
 } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
-import { ConditionSelectionArrayDoctorDto } from 'src/doctor/dto/conditionSelectionDoctorDto';
-import { DoctorSessionDeleteDto } from 'src/doctor/dto/doctorSessionDeleteDto';
+import { ConditionSelectionArrayDto } from 'src/dto/conditionSelectionDto';
+import { SessionDeleteDto } from 'src/dto/SessionDeleteDto';
 import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
 
 @Controller('doctor')
@@ -19,7 +19,7 @@ export class DoctorController {
   @UseGuards(JwtGuard)
   @Post('chooseCondition')
   async chooseDoctorCondition(
-    @Body() conditionSelectionArrayDoctorDto: ConditionSelectionArrayDoctorDto,
+    @Body() conditionSelectionArrayDoctorDto: ConditionSelectionArrayDto,
     @Request() req: any,
   ) {
     const doctorSessionDTO = await this.doctorService.saveDoctorChoices(
@@ -33,7 +33,7 @@ export class DoctorController {
   @UseGuards(JwtGuard)
   @Post('deleteConditions')
   async deleteDoctorConditions(
-    @Body() doctorSessionDeleteDto: DoctorSessionDeleteDto,
+    @Body() doctorSessionDeleteDto: SessionDeleteDto,
     @Request() req: any,
   ): Promise<any> {
     await this.doctorService.deleteDoctorSession(

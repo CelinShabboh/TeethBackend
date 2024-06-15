@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class DoctorSessionDeleteDto {
+export class SessionDeleteDto {
   @IsNotEmpty()
   readonly session_id: number;
 }

@@ -1,3 +1,4 @@
+import { PartialType } from '@nestjs/mapped-types';
 import {
   IsEmail,
   IsNumberString,
@@ -7,17 +8,11 @@ import {
   MaxLength,
   IsStrongPassword,
 } from 'class-validator';
-
-export class CreateDoctorDto {
-  @IsEmail()
-  @IsNotEmpty({ message: 'This field should not be empty' })
-  email: string;
-
+export class SameDto {
   @IsString({ message: 'This field must be a string' })
   @IsNotEmpty({ message: 'This field should not be empty' })
   @MaxLength(30)
   name: string;
-
   @IsNumberString()
   @IsMobilePhone('ar-SY')
   @IsNotEmpty({ message: 'This field should not be empty' })
@@ -37,6 +32,16 @@ export class CreateDoctorDto {
 
   @IsNotEmpty({ message: 'This field should not be empty' })
   governorate: string;
+  // verificationCode: string;
+  // verificationCodeExpiry: Date;
+  // constructor(data: Partial<CreateDoctorDto>) {
+  //   Object.assign(this, data);
+  // }
+}
+export class CreateDoctorDto extends PartialType(SameDto) {
+  @IsEmail()
+  @IsNotEmpty({ message: 'This field should not be empty' })
+  email: string;
 
   @IsNotEmpty({ message: 'This field should not be empty' })
   university: string;
@@ -44,3 +49,4 @@ export class CreateDoctorDto {
   @IsNotEmpty({ message: 'This field should not be empty' })
   collegeyear: string;
 }
+export class CreateUserDto extends PartialType(SameDto) {}

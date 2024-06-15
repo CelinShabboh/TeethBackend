@@ -14,17 +14,20 @@ import { UserService } from 'src/user/user.service';
 import { User } from 'src/entities/user.entity';
 import { UserController } from 'src/user/user.controller';
 import { RefreshJwtStrategy } from './strategies/refreshToken.strategy';
+import { ChangePasswordDto } from 'src/dto/changePasswordDto';
 import { JwtStrategy } from './strategies/jwt_strategy';
-//console.log(${process.env.jwt_secret});
+// import { MailerService } from 'src/mailer/mailer.service';
 @Module({
   providers: [
     AuthService,
     UserService,
+    DoctorService,
     LocalUserStrategy,
     DoctorService,
     LocalDoctorStrategy,
     JwtStrategy,
     RefreshJwtStrategy,
+    // MailerService,
   ],
   controllers: [AuthController, UserController],
   exports: [AuthService, JwtStrategy],
@@ -32,13 +35,12 @@ import { JwtStrategy } from './strategies/jwt_strategy';
     UserModule,
     PassportModule,
     DoctorModule,
-    TypeOrmModule.forFeature([Doctor, User]),
+    TypeOrmModule.forFeature([Doctor, User, ChangePasswordDto]),
     JwtModule.register({
       global: true,
       secret: process.env.jwt_secret,
-      signOptions: { expiresIn: '60s', algorithm: 'HS256' },
+      signOptions: { expiresIn: '30d', algorithm: 'HS256' },
     }),
   ],
 })
-
 export class AuthModule {}

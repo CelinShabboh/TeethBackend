@@ -3,19 +3,19 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/createUserDto';
+import { CreateUserDto } from 'src/dto/createDto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
-import { ConditionSelectionUserDto } from './dto/conditionSelectionUserDto';
+import { ConditionSelectionDto } from 'src/dto/conditionSelectionDto';
 import { UserCondition } from 'src/entities/userCondition.entity';
 import { Condition } from 'src/entities/condition.entity';
 import { ConditionLevel } from 'src/entities/patientCondition.entity';
 import { UserSession } from 'src/entities/userSession.entity';
-import { UserSessionDTO } from 'src/user/dto/userSessionDto';
-import { UserSessionDeleteDto } from './dto/userSessionDeleteDto';
+import { SessionDeleteDto } from 'src/dto/SessionDeleteDto';
 import { Doctor } from 'src/entities/doctor.entity';
-import { DoctorDTO } from './dto/findDoctorDto';
+import { SessionDTO } from 'src/dto/sessionDto';
+import { FindDoctorDTO } from 'src/dto/findDoctorsOrUserDto';
 
 @Injectable()
 export class UserService {
@@ -84,15 +84,15 @@ export class UserService {
   }
 
   async saveUserChoices(
-    conditionSelectionDtos: ConditionSelectionUserDto[],
+    conditionSelectionDtos: ConditionSelectionDto[],
     userId: number,
-  ): Promise<UserSessionDTO> {
+  ): Promise<SessionDTO> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       select: ['id'],
     });
     if (!user) {
-      throw new Error('User not found'); // أو يمكنك التعامل مع الخطأ بطريقة أخرى
+      throw new Error('User not found');
     }
     const userSession = new UserSession();
     userSession.user = user;
@@ -109,7 +109,8 @@ export class UserService {
             where: { id: dto.level_id },
           })
         : null;
-        const userCondition = new UserCondition();
+
+const userCondition = new UserCondition();
       userCondition.condition = condition;
       userCondition.level = level;
       userCondition.user = user;
@@ -117,21 +118,23 @@ export class UserService {
       return await this.userConditionRepository.save(userCondition);
     });
     userSession.conditions = await Promise.all(userConditionsPromises);
-    const userSessionDTO = new UserSessionDTO();
-    userSessionDTO.conditions = userSession.conditions.map((cond) => ({
-      condition: cond.condition.name, // افتراض أن هناك خاصية name في كيان Condition
-    }));
-    // تحويل المستويات إلى DTOs (إذا كان موجوداً)
-    userSessionDTO.levels = userSession.conditions
-      .map((cond) => ({
-        level: cond.level?.level_description, // افتراض أن هناك خاصية name في كيان ConditionLevel
-      }))
-      .filter((l) => l.level); // إزالة المستويات التي لم يتم تعيينها
+    const sessionData = [];
+    const userSessionDTO = new SessionDTO(sessionData);
+    userSessionDTO.data = [];
 
-    return userSessionDTO; // إرجاع DTO بدلاً من الكيان
+    for (const userCondition of userSession.conditions) {
+      userSessionDTO.data.push({
+        condition: userCondition.condition.name,
+        level: userCondition.level
+          ? userCondition.level.level_description
+          : null,
+      });
+    }
+
+    return userSessionDTO;
   }
   async deleteUserSession(
-    userSessionDeleteDto: UserSessionDeleteDto,
+    userSessionDeleteDto: SessionDeleteDto,
     userId: number,
   ): Promise<void> {
     // نبدأ المعاملة
@@ -180,7 +183,8 @@ export class UserService {
       where: { id: userId },
       relations: ['conditions', 'conditions.condition', 'conditions.level'],
     });
-    if (!user && user.conditions.length === 0) {
+
+if (!user&&user.conditions.length === 0) {
       throw new Error('No conditions found for user or user does not exist.');
     }
 
@@ -242,7 +246,7 @@ export class UserService {
       return acc;
     }, []);
 
-    return uniqueDoctors.map((doctor) => new DoctorDTO(doctor));
+    return uniqueDoctors.map((doctor) => new FindDoctorDTO(doctor));
   }
 
   async findMatchingDoctorsInOtherGovernorate(
@@ -292,7 +296,8 @@ export class UserService {
     }
 
     const doctors = await doctorsQuery.getMany();
-    // إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
+
+// إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
     const uniqueDoctors = doctors.reduce((acc, currentDoctor) => {
       // إيجاد مؤشر الطبيب في المصفوفة المتراكمة
       const existingDoctorIndex = acc.findIndex(
@@ -315,6 +320,6 @@ export class UserService {
       return acc;
     }, []);
 
-    return uniqueDoctors.map((doctor) => new DoctorDTO(doctor));
+    return uniqueDoctors.map((doctor) => new FindDoctorDTO(doctor));
   }
 }

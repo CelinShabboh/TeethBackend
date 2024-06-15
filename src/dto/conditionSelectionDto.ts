@@ -6,15 +6,15 @@ import {
   } from 'class-validator';
   import { Type } from 'class-transformer';
   
-  export class ConditionSelectionUserDto {
+  export class ConditionSelectionDto {
     @IsNotEmpty()
     readonly condition_id: number;
     @IsOptional()
     readonly level_id?: number;
   }
-  export class ConditionSelectionArrayUserDto {
+  export class ConditionSelectionArrayDto {
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => ConditionSelectionUserDto)
-    selections: ConditionSelectionUserDto[];
+    @Type(() => ConditionSelectionDto)
+    selections: ConditionSelectionDto[];
   }

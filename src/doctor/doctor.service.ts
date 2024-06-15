@@ -6,16 +6,16 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Doctor } from 'src/entities/doctor.entity';
 import { DataSource, Repository } from 'typeorm';
-import { CreateDoctorDto } from './dto/createDoctorDto';
-import { ConditionSelectionDoctorDto } from './dto/conditionSelectionDoctorDto';
-import { DoctorSessionDTO } from 'src/doctor/dto/doctorSessionDto';
+import { CreateDoctorDto } from 'src/dto/createDto';
+import { ConditionSelectionDto } from 'src/dto/conditionSelectionDto';
+import { SessionDTO } from 'src/dto/SessionDto';
 import { Condition } from 'src/entities/condition.entity';
 import { DoctorSession } from 'src/entities/doctorSession.entity';
 import { DoctorCondition } from 'src/entities/doctorCondition.entity';
 import { ConditionLevel } from 'src/entities/patientCondition.entity';
-import { DoctorSessionDeleteDto } from 'src/doctor/dto/doctorSessionDeleteDto';
+import { SessionDeleteDto } from 'src/dto/SessionDeleteDto';
 import { User } from 'src/entities/user.entity';
-import { UserDTO } from './dto/findUserDto';
+import { FindUserDTO } from 'src/dto/findDoctorsOrUserDto';
 // import { MailerService } from 'src/mailer/mailer.service';
 
 @Injectable()
@@ -97,9 +97,9 @@ export class DoctorService {
   }
 
   async saveDoctorChoices(
-    conditionSelectionDtos: ConditionSelectionDoctorDto[],
+    conditionSelectionDtos: ConditionSelectionDto[],
     doctorId: number,
-  ): Promise<DoctorSessionDTO> {
+  ): Promise<SessionDTO> {
     const doctor = await this.doctorRepository.findOne({
       where: { id: doctorId },
       select: ['id'],
@@ -112,7 +112,7 @@ export class DoctorService {
     doctorSession.conditions = [];
     await this.doctorSessionRepository.save(doctorSession);
 
-    const doctorConditionsPromises = conditionSelectionDtos.map(async (dto) => {
+const doctorConditionsPromises = conditionSelectionDtos.map(async (dto) => {
       const condition = await this.conditionRepository.findOne({
         where: { id: dto.condition_id },
       });
@@ -131,22 +131,24 @@ export class DoctorService {
       return await this.doctorConditionRepository.save(doctorCondition);
     });
     doctorSession.conditions = await Promise.all(doctorConditionsPromises);
-    const doctorSessionDTO = new DoctorSessionDTO();
-    doctorSessionDTO.conditions = doctorSession.conditions.map((cond) => ({
-      condition: cond.condition.name, // افتراض أن هناك خاصية name في كيان Condition
-    }));
-    // تحويل المستويات إلى DTOs (إذا كان موجوداً)
-    doctorSessionDTO.levels = doctorSession.conditions
-      .map((cond) => ({
-        level: cond.level?.level_description, // افتراض أن هناك خاصية name في كيان ConditionLevel
-      }))
-      .filter((l) => l.level); // إزالة المستويات التي لم يتم تعيينها
+    const sessionData = [];
+    const doctorSessionDTO = new SessionDTO(sessionData);
+    doctorSessionDTO.data = [];
+
+    for (const doctorCondition of doctorSession.conditions) {
+      doctorSessionDTO.data.push({
+        condition: doctorCondition.condition.name,
+        level: doctorCondition.level
+          ? doctorCondition.level.level_description
+          : null,
+      });
+    }
 
     return doctorSessionDTO; // إرجاع DTO بدلاً من الكيان
   }
 
   async deleteDoctorSession(
-    doctorSessionDeleteDto: DoctorSessionDeleteDto,
+    doctorSessionDeleteDto: SessionDeleteDto,
     doctorId: number,
   ): Promise<void> {
     // نبدأ المعاملة
@@ -205,7 +207,7 @@ export class DoctorService {
       relations: ['conditions', 'conditions.condition', 'conditions.level'],
     });
 
-    if (!doctor && doctor.conditions.length === 0) {
+if (!doctor && doctor.conditions.length === 0) {
       throw new Error('No conditions found for user or user does not exist.');
     }
 
@@ -267,7 +269,7 @@ export class DoctorService {
       return acc;
     }, []);
 
-    return uniqueUsers.map((doctor) => new UserDTO(doctor));
+    return uniqueUsers.map((doctor) => new FindUserDTO(doctor));
   }
   async findMatchingUsersInOtherGobernorate(
     userId: number,
@@ -317,7 +319,7 @@ export class DoctorService {
 
     const users = await usersQuery.getMany();
 
-    // إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
+// إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
     const uniqueUsers = users.reduce((acc, currentUser) => {
       // إيجاد مؤشر الطبيب في المصفوفة المتراكمة
       const existingUserIndex = acc.findIndex(
@@ -340,6 +342,6 @@ export class DoctorService {
       return acc;
     }, []);
 
-    return uniqueUsers.map((doctor) => new UserDTO(doctor));
+    return uniqueUsers.map((doctor) => new FindUserDTO(doctor));
   }
 }

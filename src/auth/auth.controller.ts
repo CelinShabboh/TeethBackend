@@ -1,20 +1,23 @@
 import {
   Body,
   Controller,
-  Get,
-  Param,
   Post,
+  Put,
+  Req,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateDoctorDto } from 'src/doctor/dto/createDoctorDto';
+import { CreateDoctorDto } from 'src/dto/createDto';
 import { DoctorService } from 'src/doctor/doctor.service';
 import { LocalUserAuthGuard } from './guards/localuser-auth.guard';
 import { LocalDoctorAuthGuard } from './guards/localdoctor-auth.guard';
-import { CreateUserDto } from 'src/user/dto/createUserDto';
+import { CreateUserDto } from 'src/dto/createDto';
 import { UserService } from 'src/user/user.service';
 import { RefreshJwtGuard } from './guards/refresh-jwt-auth.guard';
+import { ChangePasswordDto } from 'src/dto/changePasswordDto';
+import { JwtGuard } from './guards/jwt_auth.guard';
+// import { ForgotPasswordDoctorDto } from 'src/doctor/dto/forgotPasswordDoctorDto';
 
 @Controller('auth')
 export class AuthController {
@@ -52,10 +55,28 @@ export class AuthController {
   async refreshTokenUser(@Request() req) {
     return this.authService.refreshTokenUser(req.user);
   }
-
-  // @UseGuards(JwtGuard)
-  // @Get('profile')
-  // getProfile(@Request() req) {
-  //   return req.user;
-  // }
+  @UseGuards(JwtGuard)
+  @Put('doctor/change-password')
+  async changePasswordDoctor(
+    @Body() changePasswordDto: ChangePasswordDto,
+    @Req() req: any,
+  ) {
+    return this.authService.changePasswordDoctor(
+      req.user.id,
+      changePasswordDto.oldPassword,
+      changePasswordDto.newPassword,
+    );
+  }
+  @UseGuards(JwtGuard)
+  @Put('user/change-password')
+  async changePasswordUser(
+    @Body() changePasswordDto: ChangePasswordDto,
+    @Req() req: any,
+  ) {
+    return this.authService.changePasswordUser(
+      req.user.id,
+      changePasswordDto.oldPassword,
+      changePasswordDto.newPassword,
+    );
+  }
 }
