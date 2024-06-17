@@ -1,8 +1,17 @@
-import { Controller, Body, Post, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Body,
+  Post,
+  UseGuards,
+  Request,
+  Patch,
+  Param,
+} from '@nestjs/common';
 import { UserService } from './user.service';
+import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ConditionSelectionArrayDto } from 'src/dto/conditionSelectionDto';
-import { SessionDeleteDto } from 'src/dto/sessionDeleteDto';
-import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
+import { SessionDeleteDto } from 'src/dto/SessionDeleteDto';
+import { UpdateUserDto } from 'src/dto/updateDto';
 
 @Controller('user')
 export class UserController {
@@ -76,5 +85,10 @@ export class UserController {
         message: error.message,
       };
     }
+  }
+  @UseGuards(JwtGuard)
+  @Patch(':id')
+  updateDoctor(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.updateUser(id, updateUserDto);
   }
 }
