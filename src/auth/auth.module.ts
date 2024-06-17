@@ -14,9 +14,9 @@ import { UserService } from 'src/user/user.service';
 import { User } from 'src/entities/user.entity';
 import { UserController } from 'src/user/user.controller';
 import { RefreshJwtStrategy } from './strategies/refreshToken.strategy';
-import { ChangePasswordDto } from 'src/dto/changePasswordDto';
 import { JwtStrategy } from './strategies/jwt_strategy';
-// import { MailerService } from 'src/mailer/mailer.service';
+import { MailService } from 'src/mailer/mailer.service';
+import { ResetToken } from 'src/entities/resetTokenSchema.entity';
 @Module({
   providers: [
     AuthService,
@@ -27,7 +27,7 @@ import { JwtStrategy } from './strategies/jwt_strategy';
     LocalDoctorStrategy,
     JwtStrategy,
     RefreshJwtStrategy,
-    // MailerService,
+    MailService,
   ],
   controllers: [AuthController, UserController],
   exports: [AuthService, JwtStrategy],
@@ -35,7 +35,7 @@ import { JwtStrategy } from './strategies/jwt_strategy';
     UserModule,
     PassportModule,
     DoctorModule,
-    TypeOrmModule.forFeature([Doctor, User, ChangePasswordDto]),
+    TypeOrmModule.forFeature([Doctor, User, ResetToken]),
     JwtModule.register({
       global: true,
       secret: process.env.jwt_secret,

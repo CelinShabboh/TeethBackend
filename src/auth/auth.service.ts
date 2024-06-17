@@ -1,5 +1,6 @@
 import {
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -10,7 +11,10 @@ import { UserService } from 'src/user/user.service';
 import { User } from 'src/entities/user.entity';
 import { Doctor } from 'src/entities/doctor.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
+import { nanoid } from 'nanoid';
+import { MailService } from 'src/mailer/mailer.service';
+import { ResetToken } from 'src/entities/resetTokenSchema.entity';
 
 // import { VerificationCodeService } from 'src/verification/verificationCodeService';
 
@@ -20,10 +24,13 @@ export class AuthService {
     private userService: UserService,
     private doctorService: DoctorService,
     private jwtService: JwtService,
+    private mailService: MailService,
     @InjectRepository(Doctor)
     private doctorRepository: Repository<Doctor>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(ResetToken)
+    private resetToken: Repository<ResetToken>,
   ) {}
 
   async validateUser(phone: string, password: string): Promise<any> {
@@ -148,5 +155,56 @@ export class AuthService {
     user.password = newHashedPassword;
     await this.userRepository.save(user);
     return 'تم تغيير كلمة المرور بنجاح';
+  }
+  async forgotPasswordDoctor(email: string) {
+    const doctor = await this.doctorRepository.findOne({ where: { email } });
+    if (doctor) {
+      const expiry_date = new Date();
+      expiry_date.setHours(expiry_date.getHours() + 1);
+      const restToken = nanoid(64);
+      const resetTokenObject = this.resetToken.create({
+        token: restToken,
+        doctor_id: doctor.id,
+        expiry_date,
+      });
+      await this.resetToken.save(resetTokenObject);
+      this.mailService.sendPasswordResetEmail(email, restToken);
+    }
+    return { message: 'If this user exists, they will receive an email.' };
+  }
+
+  async resetPasswordDoctor(newPassword: string, resetToken: string) {
+    const token = await this.resetToken.findOne({
+      where: {
+        token: resetToken,
+        expiry_date: MoreThanOrEqual(new Date()), // الاستخدام الصحيح للمقارنة مع التاريخ الحالي
+      },
+    });
+
+    if (!token) {
+      throw new UnauthorizedException('Invalid link');
+    }
+    const doctor = await this.doctorRepository.findOne({
+      where: { id: token.doctor_id }, 
+    });
+    if (!doctor) {
+      throw new InternalServerErrorException();
+    }
+    const newHashedPassword = await bcrypt.hash(newPassword, 10);
+    doctor.password = newHashedPassword;
+    await this.doctorRepository.save(doctor);
+    return 'تم تغيير كلمة المرور بنجاح';
+  }
+  async verifyTheEmail(token: string): Promise<{ message: string }> {
+    const resetToken = await this.resetToken.findOne({
+      where: {
+        token: token,
+        expiry_date: MoreThanOrEqual(new Date()),
+      },
+    });
+    if (!resetToken) {
+      throw new NotFoundException('Token not found or has been expired');
+    }
+    return { message: 'Email verified successfully' };
   }
 }

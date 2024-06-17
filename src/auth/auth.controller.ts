@@ -17,6 +17,9 @@ import { UserService } from 'src/user/user.service';
 import { RefreshJwtGuard } from './guards/refresh-jwt-auth.guard';
 import { ChangePasswordDto } from 'src/dto/changePasswordDto';
 import { JwtGuard } from './guards/jwt_auth.guard';
+import { ForgotPasswordDto } from 'src/dto/forgotPasswordDto';
+import { ResetPasswordDto } from 'src/dto/resetPasswordDto';
+import { VerifyTheEmailDto } from 'src/dto/verifyTheEmailDto';
 // import { ForgotPasswordDoctorDto } from 'src/doctor/dto/forgotPasswordDoctorDto';
 
 @Controller('auth')
@@ -78,5 +81,22 @@ export class AuthController {
       changePasswordDto.oldPassword,
       changePasswordDto.newPassword,
     );
+  }
+  @UseGuards(JwtGuard)
+  @Post('doctor/forgot-password')
+  async forgotPasswordDoctor(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.authService.forgotPasswordDoctor(forgotPasswordDto.email);
+  }
+  @UseGuards(JwtGuard)
+  @Put('doctor/reset-password')
+  async resetPasswordDoctor(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.authService.resetPasswordDoctor(
+      resetPasswordDto.newPassword,
+      resetPasswordDto.resetToken,
+    );
+  }
+  @Post('doctor/verify-the-email')
+  async verifyTheEmail(@Body() verifyTheEmailDto: VerifyTheEmailDto) {
+    return this.authService.verifyTheEmail(verifyTheEmailDto.token);
   }
 }

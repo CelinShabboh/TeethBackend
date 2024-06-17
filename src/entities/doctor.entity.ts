@@ -11,6 +11,7 @@ import { User } from './user.entity';
 import { Content } from './same.entity';
 import { DoctorCondition } from './doctorCondition.entity';
 import { DoctorSession } from './doctorSession.entity';
+import { ResetToken } from './resetTokenSchema.entity';
 @Entity('doctors')
 export class Doctor extends Content {
   @Index({ unique: true })
@@ -34,4 +35,9 @@ export class Doctor extends Content {
 
   @OneToMany(() => DoctorSession, (session) => session.doctor, { eager: false })
   sessions: DoctorSession[];
+  @OneToMany(() => ResetToken, (resetToken) => resetToken.doctor, {
+    eager: true,
+    cascade: true,
+  })
+  resetTokens: ResetToken[];
 }

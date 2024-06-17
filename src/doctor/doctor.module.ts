@@ -9,7 +9,8 @@ import { Condition } from 'src/entities/condition.entity';
 import { ConditionLevel } from 'src/entities/patientCondition.entity';
 import { DoctorSession } from 'src/entities/doctorSession.entity';
 import { User } from 'src/entities/user.entity';
-// import { MailerService } from 'src/mailer/mailer.service';
+import { ResetToken } from 'src/entities/resetTokenSchema.entity';
+import { MailService } from 'src/mailer/mailer.service';
 
 @Module({
   imports: [
@@ -20,11 +21,12 @@ import { User } from 'src/entities/user.entity';
       ConditionLevel,
       DoctorSession,
       User,
+      ResetToken,
     ]),
     forwardRef(() => UserModule),
   ],
   exports: [TypeOrmModule, DoctorService],
   controllers: [DoctorController],
-  providers: [DoctorService],
+  providers: [DoctorService, MailService],
 })
 export class DoctorModule {}
