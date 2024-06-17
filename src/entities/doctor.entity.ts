@@ -36,15 +36,4 @@ export class Doctor extends Content {
 
   @OneToMany(() => DoctorSession, (session) => session.doctor, { eager: false })
   sessions: DoctorSession[];
-  @OneToMany(() => ResetToken, (resetToken) => resetToken.doctor, {
-    eager: false,
-    cascade: true,
-  })
-  resetTokens: ResetToken[];
-
-  @OneToMany(() => Tokens, (tokens) => tokens.doctor, {
-    eager: false,
-    cascade: true,
-  })
-  tokens: Tokens[];
 }

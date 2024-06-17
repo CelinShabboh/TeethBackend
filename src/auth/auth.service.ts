@@ -13,10 +13,16 @@ import { Doctor } from 'src/entities/doctor.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThanOrEqual, Repository } from 'typeorm';
 import { nanoid } from 'nanoid';
+<<<<<<< HEAD
 import { MailService } from 'src/mailer/mailer.service';
 import { ResetToken } from 'src/entities/resetTokenSchema.entity';
 
 // import { VerificationCodeService } from 'src/verification/verificationCodeService';
+=======
+import { ResetToken } from 'src/entities/resetTokenSchema.entity';
+import { MailService } from 'src/mailer/mailer.service';
+import { Tokens } from 'src/entities/tokens.entity';
+>>>>>>> ae66f42b0bfe7a893229d41cc8a4b56c7c505417
 
 @Injectable()
 export class AuthService {
@@ -31,6 +37,11 @@ export class AuthService {
     private userRepository: Repository<User>,
     @InjectRepository(ResetToken)
     private resetToken: Repository<ResetToken>,
+<<<<<<< HEAD
+=======
+    @InjectRepository(Tokens)
+    private tokens: Repository<Tokens>,
+>>>>>>> ae66f42b0bfe7a893229d41cc8a4b56c7c505417
   ) {}
 
   async validateUser(phone: string, password: string): Promise<any> {
@@ -136,6 +147,7 @@ export class AuthService {
     await this.doctorRepository.save(doctor);
     return 'تم تغيير كلمة المرور بنجاح';
   }
+
   async changePasswordUser(
     userId: number,
     oldPassword: string,
@@ -156,6 +168,10 @@ export class AuthService {
     await this.userRepository.save(user);
     return 'تم تغيير كلمة المرور بنجاح';
   }
+<<<<<<< HEAD
+=======
+
+>>>>>>> ae66f42b0bfe7a893229d41cc8a4b56c7c505417
   async forgotPasswordDoctor(email: string) {
     const doctor = await this.doctorRepository.findOne({ where: { email } });
     if (doctor) {
@@ -185,7 +201,11 @@ export class AuthService {
       throw new UnauthorizedException('Invalid link');
     }
     const doctor = await this.doctorRepository.findOne({
+<<<<<<< HEAD
       where: { id: token.doctor_id }, 
+=======
+      where: { id: token.doctor_id }, // هنا تغيير من userId إلى token.doctor_id
+>>>>>>> ae66f42b0bfe7a893229d41cc8a4b56c7c505417
     });
     if (!doctor) {
       throw new InternalServerErrorException();
@@ -195,16 +215,30 @@ export class AuthService {
     await this.doctorRepository.save(doctor);
     return 'تم تغيير كلمة المرور بنجاح';
   }
+<<<<<<< HEAD
   async verifyTheEmail(token: string): Promise<{ message: string }> {
     const resetToken = await this.resetToken.findOne({
+=======
+
+  async verifyTheEmail(token: string): Promise<{ message: string }> {
+    const tokens = await this.tokens.findOne({
+>>>>>>> ae66f42b0bfe7a893229d41cc8a4b56c7c505417
       where: {
         token: token,
         expiry_date: MoreThanOrEqual(new Date()),
       },
     });
+<<<<<<< HEAD
     if (!resetToken) {
+=======
+    if (!tokens) {
+>>>>>>> ae66f42b0bfe7a893229d41cc8a4b56c7c505417
       throw new NotFoundException('Token not found or has been expired');
     }
     return { message: 'Email verified successfully' };
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> ae66f42b0bfe7a893229d41cc8a4b56c7c505417

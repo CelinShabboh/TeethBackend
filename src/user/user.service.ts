@@ -12,10 +12,11 @@ import { UserCondition } from 'src/entities/userCondition.entity';
 import { Condition } from 'src/entities/condition.entity';
 import { ConditionLevel } from 'src/entities/patientCondition.entity';
 import { UserSession } from 'src/entities/userSession.entity';
-import { SessionDeleteDto } from 'src/dto/sessionDeleteDto';
+import { SessionDTO } from 'src/dto/SessionDto';
+import { SessionDeleteDto } from 'src/dto/SessionDeleteDto';
 import { Doctor } from 'src/entities/doctor.entity';
-import { SessionDTO } from 'src/dto/sessionDto';
 import { FindDoctorDTO } from 'src/dto/findDoctorsOrUserDto';
+import { UpdateUserDto } from 'src/dto/updateDto';
 
 @Injectable()
 export class UserService {
@@ -110,7 +111,7 @@ export class UserService {
           })
         : null;
 
-const userCondition = new UserCondition();
+      const userCondition = new UserCondition();
       userCondition.condition = condition;
       userCondition.level = level;
       userCondition.user = user;
@@ -184,7 +185,7 @@ const userCondition = new UserCondition();
       relations: ['conditions', 'conditions.condition', 'conditions.level'],
     });
 
-if (!user&&user.conditions.length === 0) {
+    if (!user || user.conditions.length === 0) {
       throw new Error('No conditions found for user or user does not exist.');
     }
 
@@ -258,7 +259,7 @@ if (!user&&user.conditions.length === 0) {
       relations: ['conditions', 'conditions.condition', 'conditions.level'],
     });
 
-    if (!user && user.conditions.length === 0) {
+    if (!user || user.conditions.length === 0) {
       throw new Error('No conditions found for user or user does not exist.');
     }
 
@@ -297,7 +298,7 @@ if (!user&&user.conditions.length === 0) {
 
     const doctors = await doctorsQuery.getMany();
 
-// إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
+    // إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
     const uniqueDoctors = doctors.reduce((acc, currentDoctor) => {
       // إيجاد مؤشر الطبيب في المصفوفة المتراكمة
       const existingDoctorIndex = acc.findIndex(
@@ -321,5 +322,17 @@ if (!user&&user.conditions.length === 0) {
     }, []);
 
     return uniqueDoctors.map((doctor) => new FindDoctorDTO(doctor));
+  }
+  async updateUser(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<Partial<User>> {
+    await this.userRepository.update(id, updateUserDto);
+    const updatedUser = await this.userRepository.findOne({
+      where: { id },
+      select: ['id', 'name', 'phone', 'governorate'],
+    });
+
+    return updatedUser;
   }
 }
