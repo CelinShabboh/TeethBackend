@@ -31,12 +31,8 @@ export class SameDto {
   password: string;
 
   @IsNotEmpty({ message: 'This field should not be empty' })
+  @IsString()
   governorate: string;
-  // verificationCode: string;
-  // verificationCodeExpiry: Date;
-  // constructor(data: Partial<CreateDoctorDto>) {
-  //   Object.assign(this, data);
-  // }
 }
 export class CreateDoctorDto extends PartialType(SameDto) {
   @IsEmail()
@@ -44,9 +40,11 @@ export class CreateDoctorDto extends PartialType(SameDto) {
   email: string;
 
   @IsNotEmpty({ message: 'This field should not be empty' })
+  @IsString()
   university: string;
 
   @IsNotEmpty({ message: 'This field should not be empty' })
+  @IsString()
   collegeyear: string;
 }
 export class CreateUserDto extends PartialType(SameDto) {}
