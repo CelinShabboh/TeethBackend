@@ -8,7 +8,7 @@ import { Doctor } from 'src/entities/doctor.entity';
 import { DataSource, Repository } from 'typeorm';
 import { CreateDoctorDto } from 'src/dto/createDto';
 import { ConditionSelectionDto } from 'src/dto/conditionSelectionDto';
-import { SessionDTO } from 'src/dto/SessionDto';
+import { SessionDTO } from 'src/dto/sessionDto';
 import { Condition } from 'src/entities/condition.entity';
 import { DoctorSession } from 'src/entities/doctorSession.entity';
 import { DoctorCondition } from 'src/entities/doctorCondition.entity';

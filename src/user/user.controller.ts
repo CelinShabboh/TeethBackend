@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ConditionSelectionArrayDto } from 'src/dto/conditionSelectionDto';
-import { SessionDeleteDto } from 'src/dto/SessionDeleteDto';
+import { SessionDeleteDto } from 'src/dto/sessionDeleteDto';
 import { UpdateUserDto } from 'src/dto/updateDto';
 import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
 
