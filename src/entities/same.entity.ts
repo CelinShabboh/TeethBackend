@@ -1,6 +1,12 @@
-import { BeforeInsert, Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import * as bcrypt from 'bcrypt';
-@Entity('doctors')
+@Entity('content')
 export abstract class Content {
   @PrimaryGeneratedColumn('increment')
   id: number;
@@ -20,7 +26,8 @@ export abstract class Content {
   @Index({ unique: true })
   @Column('character varying', { nullable: false, length: 10 })
   phone: string;
-  
+
   @Column('character varying', { nullable: false, length: 10 })
   governorate: string;
 }
+
