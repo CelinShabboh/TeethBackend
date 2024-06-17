@@ -8,7 +8,7 @@ import { Doctor } from 'src/entities/doctor.entity';
 import { DataSource, Repository } from 'typeorm';
 import { CreateDoctorDto } from 'src/dto/createDto';
 import { ConditionSelectionDto } from 'src/dto/conditionSelectionDto';
-import { SessionDTO } from 'src/dto/sessionDto';
+import { SessionDTO } from 'src/dto/SessionDto';
 import { Condition } from 'src/entities/condition.entity';
 import { DoctorSession } from 'src/entities/doctorSession.entity';
 import { DoctorCondition } from 'src/entities/doctorCondition.entity';
@@ -16,11 +16,16 @@ import { ConditionLevel } from 'src/entities/patientCondition.entity';
 import { SessionDeleteDto } from 'src/dto/sessionDeleteDto';
 import { User } from 'src/entities/user.entity';
 import { FindUserDTO } from 'src/dto/findDoctorsOrUserDto';
-// import { MailerService } from 'src/mailer/mailer.service';
+import { nanoid } from 'nanoid';
+import { ResetToken } from 'src/entities/resetTokenSchema.entity';
+import { MailService } from 'src/mailer/mailer.service';
+import { Tokens } from 'src/entities/tokens.entity';
+import { UpdateDoctorDto } from 'src/dto/updateDto';
 
 @Injectable()
 export class DoctorService {
   constructor(
+    private mailService: MailService,
     @InjectRepository(Doctor)
     private doctorRepository: Repository<Doctor>,
     private dataSource: DataSource,
@@ -39,21 +44,20 @@ export class DoctorService {
 
     @InjectRepository(ConditionLevel)
     private conditionLevelRepository: Repository<ConditionLevel>,
+
+    @InjectRepository(ResetToken)
+    private resetToken: Repository<ResetToken>,
     // private readonly mailerService: MailerService,
   ) {}
 
   async create(createDoctorDto: CreateDoctorDto): Promise<{ message: string }> {
     const { email, name, phone } = createDoctorDto;
-    // const verificationCode = this.generateVerificationCode();
-    // const verificationCodeExpiry = new Date(Date.now() + 10 * 60 * 1000);
-    // بداية المعاملة
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      // تنفيذ استعلام قاعدة البيانات الخام
       const conflictQuery = `
         SELECT 1 FROM doctors WHERE email = $1
         UNION
@@ -73,10 +77,21 @@ export class DoctorService {
           'An account with similar email, name, or phone already exists.',
         );
       }
-      // const newDoctorData = { ...createDoctorDto, verificationCode, verificationCodeExpiry };
+
       const newDoctor = queryRunner.manager.create(Doctor, createDoctorDto);
       await queryRunner.manager.save(newDoctor);
-      // await this.mailerService.sendVerificationEmail(email, verificationCode);
+
+      const tokens = nanoid(64);
+      const expiry_date = new Date();
+      expiry_date.setMinutes(expiry_date.getMinutes() + 2);
+
+      const resetTokenObject = queryRunner.manager.create(Tokens, {
+        token: tokens,
+        doctor: newDoctor,
+        expiry_date,
+      });
+      await queryRunner.manager.save(resetTokenObject);
+      this.mailService.sendToken(email, tokens);
       await queryRunner.commitTransaction();
       return {
         message:
@@ -112,7 +127,7 @@ export class DoctorService {
     doctorSession.conditions = [];
     await this.doctorSessionRepository.save(doctorSession);
 
-const doctorConditionsPromises = conditionSelectionDtos.map(async (dto) => {
+    const doctorConditionsPromises = conditionSelectionDtos.map(async (dto) => {
       const condition = await this.conditionRepository.findOne({
         where: { id: dto.condition_id },
       });
@@ -207,7 +222,7 @@ const doctorConditionsPromises = conditionSelectionDtos.map(async (dto) => {
       relations: ['conditions', 'conditions.condition', 'conditions.level'],
     });
 
-if (!doctor && doctor.conditions.length === 0) {
+    if (!doctor || doctor.conditions.length === 0) {
       throw new Error('No conditions found for user or user does not exist.');
     }
 
@@ -280,7 +295,7 @@ if (!doctor && doctor.conditions.length === 0) {
       relations: ['conditions', 'conditions.condition', 'conditions.level'],
     });
 
-    if (!doctor && doctor.conditions.length === 0) {
+    if (!doctor || doctor.conditions.length === 0) {
       throw new Error('No conditions found for user or user does not exist.');
     }
 
@@ -319,7 +334,7 @@ if (!doctor && doctor.conditions.length === 0) {
 
     const users = await usersQuery.getMany();
 
-// إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
+    // إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
     const uniqueUsers = users.reduce((acc, currentUser) => {
       // إيجاد مؤشر الطبيب في المصفوفة المتراكمة
       const existingUserIndex = acc.findIndex(
@@ -343,5 +358,25 @@ if (!doctor && doctor.conditions.length === 0) {
     }, []);
 
     return uniqueUsers.map((doctor) => new FindUserDTO(doctor));
+  }
+  async updateDoctor(
+    id: number,
+    updateDoctorDto: UpdateDoctorDto,
+  ): Promise<Partial<Doctor>> {
+    await this.doctorRepository.update(id, updateDoctorDto);
+    const updatedDoctor = await this.doctorRepository.findOne({
+      where: { id },
+      select: [
+        'id',
+        'name',
+        'phone',
+        'governorate',
+        'email',
+        'university',
+        'collegeyear',
+      ],
+    });
+
+    return updatedDoctor;
   }
 }
