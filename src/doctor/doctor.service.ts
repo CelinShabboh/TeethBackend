@@ -83,7 +83,7 @@ export class DoctorService {
 
       const tokens = nanoid(64);
       const expiry_date = new Date();
-      expiry_date.setHours(expiry_date.getMinutes() + 2);
+      expiry_date.setHours(expiry_date.getHours() + 2);
 
       const resetTokenObject = queryRunner.manager.create(Tokens, {
         token: tokens,
