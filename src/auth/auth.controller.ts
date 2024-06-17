@@ -15,19 +15,11 @@ import { LocalDoctorAuthGuard } from './guards/localdoctor-auth.guard';
 import { CreateUserDto } from 'src/dto/createDto';
 import { UserService } from 'src/user/user.service';
 import { RefreshJwtGuard } from './guards/refresh-jwt-auth.guard';
-import { JwtGuard } from './guards/jwt-auth.guard';
 import { ChangePasswordDto } from 'src/dto/changePasswordDto';
-<<<<<<< HEAD
+import { ForgotPasswordDto } from 'src/dto/forgotPasswordDto';
+import { ResetPasswordDto } from 'src/dto/resetPasswordDto';
+import { VerifyTheEmailDto } from 'src/dto/verifyTheEmailDto';
 import { JwtGuard } from './guards/jwt_auth.guard';
-import { ForgotPasswordDto } from 'src/dto/forgotPasswordDto';
-import { ResetPasswordDto } from 'src/dto/resetPasswordDto';
-import { VerifyTheEmailDto } from 'src/dto/verifyTheEmailDto';
-// import { ForgotPasswordDoctorDto } from 'src/doctor/dto/forgotPasswordDoctorDto';
-=======
-import { ForgotPasswordDto } from 'src/dto/forgotPasswordDto';
-import { ResetPasswordDto } from 'src/dto/resetPasswordDto';
-import { VerifyTheEmailDto } from 'src/dto/verifyTheEmailDto';
->>>>>>> ae66f42b0bfe7a893229d41cc8a4b56c7c505417
 
 @Controller('auth')
 export class AuthController {
@@ -89,10 +81,7 @@ export class AuthController {
       changePasswordDto.newPassword,
     );
   }
-<<<<<<< HEAD
-=======
 
->>>>>>> ae66f42b0bfe7a893229d41cc8a4b56c7c505417
   @UseGuards(JwtGuard)
   @Post('doctor/forgot-password')
   async forgotPasswordDoctor(@Body() forgotPasswordDto: ForgotPasswordDto) {
@@ -110,8 +99,4 @@ export class AuthController {
   async verifyTheEmail(@Body() verifyTheEmailDto: VerifyTheEmailDto) {
     return this.authService.verifyTheEmail(verifyTheEmailDto.token);
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> ae66f42b0bfe7a893229d41cc8a4b56c7c505417

@@ -12,19 +12,13 @@ import { LocalDoctorStrategy } from './strategies/localdoctor-strategy';
 import { DoctorModule } from 'src/doctor/doctor.module';
 import { UserService } from 'src/user/user.service';
 import { User } from 'src/entities/user.entity';
-import { JwtStrategy } from './strategies/jwt-strategy';
 import { UserController } from 'src/user/user.controller';
 import { RefreshJwtStrategy } from './strategies/refreshToken.strategy';
-<<<<<<< HEAD
-import { JwtStrategy } from './strategies/jwt_strategy';
-import { MailService } from 'src/mailer/mailer.service';
-import { ResetToken } from 'src/entities/resetTokenSchema.entity';
-=======
 import { ChangePasswordDto } from 'src/dto/changePasswordDto';
 import { MailService } from 'src/mailer/mailer.service';
 import { ResetToken } from 'src/entities/resetTokenSchema.entity';
 import { Tokens } from 'src/entities/tokens.entity';
->>>>>>> ae66f42b0bfe7a893229d41cc8a4b56c7c505417
+import { JwtStrategy } from './strategies/jwt_strategy';
 @Module({
   providers: [
     AuthService,
@@ -43,9 +37,6 @@ import { Tokens } from 'src/entities/tokens.entity';
     UserModule,
     PassportModule,
     DoctorModule,
-<<<<<<< HEAD
-    TypeOrmModule.forFeature([Doctor, User, ResetToken]),
-=======
     TypeOrmModule.forFeature([
       Doctor,
       User,
@@ -53,7 +44,6 @@ import { Tokens } from 'src/entities/tokens.entity';
       ResetToken,
       Tokens,
     ]),
->>>>>>> ae66f42b0bfe7a893229d41cc8a4b56c7c505417
     JwtModule.register({
       global: true,
       secret: process.env.jwt_secret,

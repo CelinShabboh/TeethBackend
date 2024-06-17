@@ -9,10 +9,10 @@ import {
   Patch,
 } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
-import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ConditionSelectionArrayDto } from 'src/dto/conditionSelectionDto';
 import { SessionDeleteDto } from 'src/dto/sessionDeleteDto';
 import { UpdateDoctorDto } from 'src/dto/updateDto';
+import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
 
 @Controller('doctor')
 export class DoctorController {
