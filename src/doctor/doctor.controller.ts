@@ -6,11 +6,13 @@ import {
   Body,
   UseGuards,
   Request,
+  Patch,
 } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
+import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ConditionSelectionArrayDto } from 'src/dto/conditionSelectionDto';
-import { SessionDeleteDto } from 'src/dto/sessionDeleteDto';
-import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
+import { SessionDeleteDto } from 'src/dto/SessionDeleteDto';
+import { UpdateDoctorDto } from 'src/dto/updateDto';
 
 @Controller('doctor')
 export class DoctorController {
@@ -90,5 +92,13 @@ export class DoctorController {
         message: error.message,
       };
     }
+  }
+  @UseGuards(JwtGuard)
+  @Patch(':id')
+  updateDoctor(
+    @Param('id') id: number,
+    @Body() updateDoctorDto: UpdateDoctorDto,
+  ) {
+    return this.doctorService.updateDoctor(id, updateDoctorDto);
   }
 }
