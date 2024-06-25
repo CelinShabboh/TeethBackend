@@ -170,7 +170,7 @@ async saveDoctorChoices(
       // الحصول على جلسة الطبيب والتأكد من ملكية الطبيب لها
       const session = await queryRunner.manager.findOne(DoctorSession, {
         where: {
-          id: doctorId ,
+          doctor: { id: doctorId },
         },
         select: ['id'],
       });
