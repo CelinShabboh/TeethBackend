@@ -6,16 +6,20 @@ import {
   Request,
   Patch,
   Param,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ConditionSelectionArrayDto } from 'src/dto/conditionSelectionDto';
-import { SessionDeleteDto } from 'src/dto/sessionDeleteDto';
 import { UpdateUserDto } from 'src/dto/updateDto';
+import { DoctorService } from 'src/doctor/doctor.service';
 import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly doctorService: DoctorService,
+  ) {}
 
   @UseGuards(JwtGuard)
   @Post('chooseCondition')
@@ -33,14 +37,16 @@ export class UserController {
 
   @UseGuards(JwtGuard)
   @Post('deleteConditions')
-  async deleteUserConditions(
-    @Body() userSessionDeleteDto: SessionDeleteDto,
-    @Request() req: any,
-  ): Promise<any> {
-    await this.userService.deleteUserSession(userSessionDeleteDto, req.user.id);
+  async deleteUserConditions(@Request() req: any): Promise<any> {
+    const userId = req.user.id;
+    const userSeesion = await this.userService.getUserSessionId(userId);
+    if (!userSeesion) {
+      throw new NotFoundException('جلسة الطبيب غير موجودة.');
+    }
+    await this.userService.deleteUserSession(userSeesion.id);
     return {
       message:
-        ' The user session and related cases have been successfully deleted ',
+        'The user session and related cases have been successfully deleted ',
     };
   }
 
@@ -91,4 +97,11 @@ export class UserController {
   updateDoctor(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.updateUser(id, updateUserDto);
   }
+  // @Get('doctor/:id/status')
+  // async getDoctorStatus(
+  //   @Param('id') doctorId: number,
+  // ): Promise<{ isOnline: boolean }> {
+  //   const isOnline = await this.doctorService.getDoctorStatus(doctorId);
+  //   return { isOnline };
+  // }
 }

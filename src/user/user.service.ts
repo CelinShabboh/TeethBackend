@@ -13,7 +13,6 @@ import { Condition } from 'src/entities/condition.entity';
 import { ConditionLevel } from 'src/entities/patientCondition.entity';
 import { UserSession } from 'src/entities/userSession.entity';
 import { SessionDTO } from 'src/dto/sessionDto';
-import { SessionDeleteDto } from 'src/dto/sessionDeleteDto';
 import { Doctor } from 'src/entities/doctor.entity';
 import { FindDoctorDTO } from 'src/dto/findDoctorsOrUserDto';
 import { UpdateUserDto } from 'src/dto/updateDto';
@@ -134,10 +133,7 @@ export class UserService {
 
     return userSessionDTO;
   }
-  async deleteUserSession(
-    userSessionDeleteDto: SessionDeleteDto,
-    userId: number,
-  ): Promise<void> {
+  async deleteUserSession(userSessionId: number): Promise<void> {
     // نبدأ المعاملة
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -147,8 +143,7 @@ export class UserService {
       // الحصول على جلسة الطبيب والتأكد من ملكية الطبيب لها
       const session = await queryRunner.manager.findOne(UserSession, {
         where: {
-          id: userSessionDeleteDto.session_id,
-          user: { id: userId },
+          id: userSessionId,
         },
         select: ['id'],
       });
@@ -334,5 +329,10 @@ export class UserService {
     });
 
     return updatedUser;
+  }
+  async getUserSessionId(userId: number): Promise<UserSession | null> {
+    return await this.userSessionRepository.findOne({
+      where: { user: { id: userId } },
+    });
   }
 }

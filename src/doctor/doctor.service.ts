@@ -13,7 +13,6 @@ import { Condition } from 'src/entities/condition.entity';
 import { DoctorSession } from 'src/entities/doctorSession.entity';
 import { DoctorCondition } from 'src/entities/doctorCondition.entity';
 import { ConditionLevel } from 'src/entities/patientCondition.entity';
-import { SessionDeleteDto } from 'src/dto/sessionDeleteDto';
 import { User } from 'src/entities/user.entity';
 import { FindUserDTO } from 'src/dto/findDoctorsOrUserDto';
 import { nanoid } from 'nanoid';
@@ -47,7 +46,6 @@ export class DoctorService {
 
     @InjectRepository(ResetToken)
     private resetToken: Repository<ResetToken>,
-    // private readonly mailerService: MailerService,
   ) {}
 
   async create(createDoctorDto: CreateDoctorDto): Promise<{ message: string }> {
@@ -83,7 +81,7 @@ export class DoctorService {
 
       const tokens = nanoid(64);
       const expiry_date = new Date();
-      expiry_date.setHours(expiry_date.getHours() + 2);
+      expiry_date.setMinutes(expiry_date.getMinutes() + 2);
 
       const resetTokenObject = queryRunner.manager.create(Tokens, {
         token: tokens,
@@ -111,7 +109,7 @@ export class DoctorService {
     return await this.doctorRepository.findOne({ where: { email } });
   }
 
-  async saveDoctorChoices(
+async saveDoctorChoices(
     conditionSelectionDtos: ConditionSelectionDto[],
     doctorId: number,
   ): Promise<SessionDTO> {
@@ -162,10 +160,7 @@ export class DoctorService {
     return doctorSessionDTO; // إرجاع DTO بدلاً من الكيان
   }
 
-  async deleteDoctorSession(
-    doctorSessionDeleteDto: SessionDeleteDto,
-    doctorId: number,
-  ): Promise<void> {
+  async deleteDoctorSession(doctorId: number): Promise<void> {
     // نبدأ المعاملة
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -175,7 +170,6 @@ export class DoctorService {
       // الحصول على جلسة الطبيب والتأكد من ملكية الطبيب لها
       const session = await queryRunner.manager.findOne(DoctorSession, {
         where: {
-          id: doctorSessionDeleteDto.session_id,
           doctor: { id: doctorId },
         },
         select: ['id'],
@@ -211,18 +205,13 @@ export class DoctorService {
     const result = await this.doctorRepository.delete(id);
     return result;
   }
-  // private generateVerificationCode(): string {
-  //   // افترض أن هذه الوظيفة توليد رمز فريد
-  //   return Math.random().toString(36).substring(2, 8).toUpperCase();
-  // }
-
   async findMatchingUsersInSameGobernorate(userId: number) {
     const doctor = await this.doctorRepository.findOne({
       where: { id: userId },
       relations: ['conditions', 'conditions.condition', 'conditions.level'],
     });
 
-    if (!doctor || doctor.conditions.length === 0) {
+if (!doctor && doctor.conditions.length === 0) {
       throw new Error('No conditions found for user or user does not exist.');
     }
 
@@ -295,7 +284,7 @@ export class DoctorService {
       relations: ['conditions', 'conditions.condition', 'conditions.level'],
     });
 
-    if (!doctor || doctor.conditions.length === 0) {
+    if (!doctor && doctor.conditions.length === 0) {
       throw new Error('No conditions found for user or user does not exist.');
     }
 
@@ -334,7 +323,7 @@ export class DoctorService {
 
     const users = await usersQuery.getMany();
 
-    // إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
+// إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
     const uniqueUsers = users.reduce((acc, currentUser) => {
       // إيجاد مؤشر الطبيب في المصفوفة المتراكمة
       const existingUserIndex = acc.findIndex(
@@ -378,5 +367,21 @@ export class DoctorService {
     });
 
     return updatedDoctor;
+  }
+  // async setDoctorStatus(doctorId: number, isOnline: boolean): Promise<void> {
+  //   const doctor = await this.doctorRepository.findOne(doctorId);
+  //   if (doctor) {
+  //     doctor.isOnline = isOnline;
+  //     await this.doctorRepository.save(doctor);
+  //   }
+  // }
+  // async getDoctorStatus(doctorId: number): Promise<boolean> {
+  //   const doctor = await this.doctorRepository.findOne(doctorId);
+  //   return doctor ? doctor.isOnline : false;
+  // }
+  async getDoctorSessionId(doctorId: number): Promise<DoctorSession | null> {
+    return await this.doctorSessionRepository.findOne({
+      where: { doctor: { id: doctorId } },
+    });
   }
 }

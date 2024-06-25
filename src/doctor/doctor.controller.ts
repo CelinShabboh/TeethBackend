@@ -7,10 +7,10 @@ import {
   UseGuards,
   Request,
   Patch,
+  NotFoundException,
 } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { ConditionSelectionArrayDto } from 'src/dto/conditionSelectionDto';
-import { SessionDeleteDto } from 'src/dto/sessionDeleteDto';
 import { UpdateDoctorDto } from 'src/dto/updateDto';
 import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
 
@@ -28,20 +28,19 @@ export class DoctorController {
       conditionSelectionArrayDoctorDto.selections,
       req.user.id,
     );
-
     return doctorSessionDTO;
   }
 
   @UseGuards(JwtGuard)
   @Post('deleteConditions')
-  async deleteDoctorConditions(
-    @Body() doctorSessionDeleteDto: SessionDeleteDto,
-    @Request() req: any,
-  ): Promise<any> {
-    await this.doctorService.deleteDoctorSession(
-      doctorSessionDeleteDto,
-      req.user.id,
-    );
+  async deleteDoctorConditions(@Request() req: any): Promise<any> {
+    const doctorId = req.user.id;
+    const doctorSession = await this.doctorService.getDoctorSessionId(doctorId);
+
+    if (!doctorSession) {
+      throw new NotFoundException('جلسة الطبيب غير موجودة.');
+    }
+    await this.doctorService.deleteDoctorSession(doctorSession.id);
     return {
       message:
         'The doctor session and related cases have been successfully deleted ',
