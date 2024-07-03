@@ -121,7 +121,7 @@ export class AuthService {
     doctorId: number,
     oldPassword: string,
     newPassword: string,
-  ): Promise<string> {
+  ): Promise<{message: string}> {
     const doctor = await this.doctorRepository.findOne({
       where: { id: doctorId },
     });
@@ -135,14 +135,14 @@ export class AuthService {
     const newHashedPassword = await bcrypt.hash(newPassword, 10);
     doctor.password = newHashedPassword;
     await this.doctorRepository.save(doctor);
-    return 'تم تغيير كلمة المرور بنجاح';
+    return {message: 'تم تغيير كلمة المرور بنجاح'};
   }
 
   async changePasswordUser(
     userId: number,
     oldPassword: string,
     newPassword: string,
-  ): Promise<string> {
+  ): Promise<{message: string}> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
     });
@@ -156,7 +156,7 @@ export class AuthService {
     const newHashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = newHashedPassword;
     await this.userRepository.save(user);
-    return 'تم تغيير كلمة المرور بنجاح';
+    return {message: 'تم تغيير كلمة المرور بنجاح'};
   }
 
   async forgotPasswordDoctor(email: string) {
@@ -196,7 +196,7 @@ export class AuthService {
     const newHashedPassword = await bcrypt.hash(newPassword, 10);
     doctor.password = newHashedPassword;
     await this.doctorRepository.save(doctor);
-    return 'تم تغيير كلمة المرور بنجاح';
+    return {message :'تم تغيير كلمة المرور بنجاح'};
   }
 
   async verifyTheEmail(token: string): Promise<{ message: string }> {
