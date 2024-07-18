@@ -24,6 +24,7 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { CloudinaryResponse } from 'src/cloudinary/cloudinary-response';
 import axios from 'axios';
 import { JwtGuard } from 'src/auth/guards/jwt_auth.guard';
+import { error } from 'console';
 @Controller('doctor')
 export class DoctorController {
   constructor(
@@ -177,6 +178,7 @@ export class DoctorController {
 
       return { secure_url: secureUrl };
     } catch (error) {
+      console.error(error);
       throw new InternalServerErrorException('Failed to upload image');
     }
   }
