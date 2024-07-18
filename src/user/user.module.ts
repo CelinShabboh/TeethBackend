@@ -10,6 +10,8 @@ import { UserSession } from 'src/entities/userSession.entity';
 import { Doctor } from 'src/entities/doctor.entity';
 import { UserService } from './user.service';
 import { JwtStrategy } from 'src/auth/strategies/jwt_strategy';
+import { DoctorImage } from 'src/entities/doctorImage.entity';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -19,7 +21,9 @@ import { JwtStrategy } from 'src/auth/strategies/jwt_strategy';
       ConditionLevel,
       UserSession,
       Doctor,
+      DoctorImage,
     ]),
+    CloudinaryModule,
     forwardRef(() => DoctorModule),
   ],
   exports: [TypeOrmModule, UserService],

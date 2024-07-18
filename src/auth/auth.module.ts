@@ -19,6 +19,7 @@ import { MailService } from 'src/mailer/mailer.service';
 import { ResetToken } from 'src/entities/resetTokenSchema.entity';
 import { Tokens } from 'src/entities/tokens.entity';
 import { JwtStrategy } from './strategies/jwt_strategy';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 @Module({
   providers: [
     AuthService,
@@ -49,6 +50,7 @@ import { JwtStrategy } from './strategies/jwt_strategy';
       secret: process.env.jwt_secret,
       signOptions: { expiresIn: '30d', algorithm: 'HS256' },
     }),
+    CloudinaryModule,
   ],
 })
 export class AuthModule {}

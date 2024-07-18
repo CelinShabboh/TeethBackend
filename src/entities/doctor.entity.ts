@@ -13,6 +13,7 @@ import { DoctorCondition } from './doctorCondition.entity';
 import { DoctorSession } from './doctorSession.entity';
 import { ResetToken } from './resetTokenSchema.entity';
 import { Tokens } from './tokens.entity';
+import { DoctorImage } from './doctorImage.entity';
 @Entity('doctors')
 export class Doctor extends Content {
   @Index({ unique: true })
@@ -47,4 +48,8 @@ export class Doctor extends Content {
     cascade: true,
   })
   tokens: Tokens[];
+
+  @OneToMany(() => DoctorImage, (doctorImage) => doctorImage.doctor)
+  images: DoctorImage[];
+
 }

@@ -20,11 +20,13 @@ import { ResetToken } from 'src/entities/resetTokenSchema.entity';
 import { MailService } from 'src/mailer/mailer.service';
 import { Tokens } from 'src/entities/tokens.entity';
 import { UpdateDoctorDto } from 'src/dto/updateDto';
-
+import { DoctorImage } from 'src/entities/doctorImage.entity';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 @Injectable()
 export class DoctorService {
   constructor(
     private mailService: MailService,
+    private cloudinaryService: CloudinaryService,
     @InjectRepository(Doctor)
     private doctorRepository: Repository<Doctor>,
     private dataSource: DataSource,
@@ -46,6 +48,9 @@ export class DoctorService {
 
     @InjectRepository(ResetToken)
     private resetToken: Repository<ResetToken>,
+
+    @InjectRepository(DoctorImage)
+    private readonly doctorImageRepository: Repository<DoctorImage>,
   ) {}
 
   async create(createDoctorDto: CreateDoctorDto): Promise<{ message: string }> {
@@ -109,7 +114,7 @@ export class DoctorService {
     return await this.doctorRepository.findOne({ where: { email } });
   }
 
-async saveDoctorChoices(
+  async saveDoctorChoices(
     conditionSelectionDtos: ConditionSelectionDto[],
     doctorId: number,
   ): Promise<SessionDTO> {
@@ -160,7 +165,7 @@ async saveDoctorChoices(
     return doctorSessionDTO; // إرجاع DTO بدلاً من الكيان
   }
 
-  async deleteDoctorSession(doctorId: number): Promise<void> {
+  async deleteDoctorSession(doctorSessionId: number): Promise<void> {
     // نبدأ المعاملة
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -170,7 +175,7 @@ async saveDoctorChoices(
       // الحصول على جلسة الطبيب والتأكد من ملكية الطبيب لها
       const session = await queryRunner.manager.findOne(DoctorSession, {
         where: {
-         id: doctorId ,
+          id: doctorSessionId,
         },
         select: ['id'],
       });
@@ -211,7 +216,7 @@ async saveDoctorChoices(
       relations: ['conditions', 'conditions.condition', 'conditions.level'],
     });
 
-if (!doctor && doctor.conditions.length === 0) {
+    if (!doctor || doctor.conditions.length === 0) {
       throw new Error('No conditions found for user or user does not exist.');
     }
 
@@ -284,7 +289,7 @@ if (!doctor && doctor.conditions.length === 0) {
       relations: ['conditions', 'conditions.condition', 'conditions.level'],
     });
 
-    if (!doctor && doctor.conditions.length === 0) {
+    if (!doctor || doctor.conditions.length === 0) {
       throw new Error('No conditions found for user or user does not exist.');
     }
 
@@ -323,7 +328,7 @@ if (!doctor && doctor.conditions.length === 0) {
 
     const users = await usersQuery.getMany();
 
-// إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
+    // إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
     const uniqueUsers = users.reduce((acc, currentUser) => {
       // إيجاد مؤشر الطبيب في المصفوفة المتراكمة
       const existingUserIndex = acc.findIndex(
@@ -383,5 +388,21 @@ if (!doctor && doctor.conditions.length === 0) {
     return await this.doctorSessionRepository.findOne({
       where: { doctor: { id: doctorId } },
     });
+  }
+  async uploadImage(
+    description: string,
+    uploadedImage: Express.Multer.File,
+    doctorId: number,
+  ) {
+    const cloudinaryResponse =
+      await this.cloudinaryService.uploadFile(uploadedImage);
+    const secureUrl = cloudinaryResponse.secure_url;
+    const newImage = new DoctorImage();
+    newImage.description = description;
+    newImage.image_url = secureUrl;
+    newImage.doctorId = doctorId;
+    await this.doctorImageRepository.save(newImage, { reload: true });
+
+    return { secure_url: secureUrl };
   }
 }
