@@ -11,6 +11,9 @@ export abstract class Content {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
+  @Column()
+  photo:string;
+
   @Index({ unique: true })
   @Column('character varying', { nullable: false, length: 50 })
   name: string;

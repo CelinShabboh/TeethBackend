@@ -389,20 +389,27 @@ export class DoctorService {
       where: { doctor: { id: doctorId } },
     });
   }
-  async uploadImage(
-    description: string,
-    uploadedImage: Express.Multer.File,
-    doctorId: number,
-  ) {
-    const cloudinaryResponse =
-      await this.cloudinaryService.uploadFile(uploadedImage);
-    const secureUrl = cloudinaryResponse.secure_url;
+  async uploadImage(description: string, imageUrl: string, doctorId: number) {
     const newImage = new DoctorImage();
     newImage.description = description;
-    newImage.image_url = secureUrl;
+    newImage.image_url = imageUrl;
     newImage.doctorId = doctorId;
     await this.doctorImageRepository.save(newImage, { reload: true });
 
-    return { secure_url: secureUrl };
+    return newImage;
+  }
+  async uploadPhoto(imageUrl: string, doctorId: number) {
+    const newImage = this.doctorRepository.create();
+    newImage.photo = imageUrl;
+    newImage.id = doctorId;
+    await this.doctorRepository.save(newImage, { reload: true });
+
+    return { image_url: newImage.photo };
+  }
+  async getUserProfiel(id: number): Promise<any> {
+    const profiel = await this.userRepository.findOne({
+      where: { id },
+    });
+    return profiel;
   }
 }

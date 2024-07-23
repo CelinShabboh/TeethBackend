@@ -16,6 +16,7 @@ import { SessionDTO } from 'src/dto/sessionDto';
 import { Doctor } from 'src/entities/doctor.entity';
 import { FindDoctorDTO } from 'src/dto/findDoctorsOrUserDto';
 import { UpdateUserDto } from 'src/dto/updateDto';
+import { DoctorImage } from 'src/entities/doctorImage.entity';
 
 @Injectable()
 export class UserService {
@@ -38,6 +39,9 @@ export class UserService {
 
     @InjectRepository(ConditionLevel)
     private conditionLevelRepository: Repository<ConditionLevel>,
+
+    @InjectRepository(DoctorImage)
+    private readonly doctorImageRepository: Repository<DoctorImage>,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<{ message: string }> {
@@ -334,5 +338,28 @@ export class UserService {
     return await this.userSessionRepository.findOne({
       where: { user: { id: userId } },
     });
+  }
+  async getDoctorImages(doctorId: number): Promise<any[]> {
+    const images = await this.doctorImageRepository.find({
+      where: { doctorId },
+    });
+    return images.map((image) => ({
+      image_url: image.image_url,
+      description: image.description,
+    }));
+  }
+  async getDoctorProfiel(id: number): Promise<any> {
+    const profiel = await this.doctorRepository.findOne({
+      where: { id },
+    });
+    return profiel;
+  }
+  async uploadPhoto(imageUrl: string, userId: number) {
+    const newImage = this.userRepository.create();
+    newImage.photo = imageUrl;
+    newImage.id = userId;
+    await this.userRepository.save(newImage, { reload: true });
+
+    return { image_url: newImage.photo };
   }
 }

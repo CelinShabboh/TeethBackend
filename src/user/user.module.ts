@@ -9,9 +9,11 @@ import { ConditionLevel } from 'src/entities/patientCondition.entity';
 import { UserSession } from 'src/entities/userSession.entity';
 import { Doctor } from 'src/entities/doctor.entity';
 import { UserService } from './user.service';
-import { JwtStrategy } from 'src/auth/strategies/jwt_strategy';
+import { DoctorService } from 'src/doctor/doctor.service';
+import { MailService } from 'src/mailer/mailer.service';
 import { DoctorImage } from 'src/entities/doctorImage.entity';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { JwtStrategy } from 'src/auth/strategies/jwt_strategy';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -28,6 +30,6 @@ import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
   ],
   exports: [TypeOrmModule, UserService],
   controllers: [UserController],
-  providers: [JwtStrategy, UserService],
+  providers: [JwtStrategy, UserService, DoctorService, MailService],
 })
 export class UserModule {}

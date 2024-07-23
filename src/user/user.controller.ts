@@ -6,6 +6,7 @@ import {
   Request,
   Patch,
   Param,
+  Get,
   NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -97,11 +98,17 @@ export class UserController {
   updateDoctor(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.updateUser(id, updateUserDto);
   }
-  // @Get('doctor/:id/status')
-  // async getDoctorStatus(
-  //   @Param('id') doctorId: number,
-  // ): Promise<{ isOnline: boolean }> {
-  //   const isOnline = await this.doctorService.getDoctorStatus(doctorId);
-  //   return { isOnline };
-  // }
+
+  @UseGuards(JwtGuard)
+  @Get('doctors/:doctorId/images')
+  async getDoctorImages(@Param('doctorId') doctorId: number): Promise<any> {
+    const images = await this.userService.getDoctorImages(doctorId);
+    return images;
+  }
+  @UseGuards(JwtGuard)
+  @Get('doctor/:id/profiel')
+  async getDoctorProfiel(@Param('id') id: number): Promise<any> {
+    const profiel = await this.userService.getDoctorProfiel(id);
+    return profiel;
+  }
 }
