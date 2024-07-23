@@ -398,18 +398,19 @@ export class DoctorService {
 
     return newImage;
   }
-  async uploadPhoto(imageUrl: string, doctorId: number) {
+  async uploadPhoto(imageUrl: string, doctorid: number) {
     const newImage = this.doctorRepository.create();
     newImage.photo = imageUrl;
-    newImage.id = doctorId;
+    newImage.id = doctorid;
     await this.doctorRepository.save(newImage, { reload: true });
 
     return { image_url: newImage.photo };
   }
   async getUserProfiel(id: number): Promise<any> {
-    const profiel = await this.userRepository.findOne({
-      where: { id },
-    });
-    return profiel;
-  }
+     const profiel = await this.userRepository.findOne({
+       where: { id },
+    select: ['id','name','photo','phone','governorate'],
+      });
+       return profiel;
+      }
 }

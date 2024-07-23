@@ -351,8 +351,9 @@ export class UserService {
   async getDoctorProfiel(id: number): Promise<any> {
     const profiel = await this.doctorRepository.findOne({
       where: { id },
-    });
-    return profiel;
+   select: ['id','name','photo','email','phone','collegeyear','governorate'],
+     });
+      return profiel;
   }
   async uploadPhoto(imageUrl: string, userId: number) {
     const newImage = this.userRepository.create();
