@@ -13,6 +13,6 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  await app.listen(8000,'192.168.94.243');
+  await app.listen(8000);
 }
 bootstrap();
