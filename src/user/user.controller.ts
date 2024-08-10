@@ -8,6 +8,7 @@ import {
   Param,
   Get,
   NotFoundException,
+  Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ConditionSelectionArrayDto } from 'src/dto/conditionSelectionDto';
@@ -110,5 +111,10 @@ export class UserController {
   async getDoctorProfiel(@Param('id') id: number): Promise<any> {
     const profiel = await this.userService.getDoctorProfiel(id);
     return profiel;
+  }
+
+  @Delete('delete/:id')
+  async deleteUser(@Param('id') userId: number): Promise<any> {
+    return this.userService.deleteUser(userId);
   }
 }

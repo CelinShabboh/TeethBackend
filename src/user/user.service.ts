@@ -363,4 +363,9 @@ export class UserService {
 
     return { image_url: newImage.photo };
   }
+
+  async deleteUser(id: number): Promise<any> {
+    const result = await this.userRepository.delete(id);
+    return result;
+  }
 }
