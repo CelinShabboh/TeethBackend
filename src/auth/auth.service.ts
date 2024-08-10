@@ -208,7 +208,9 @@ export class AuthService {
     });
     if (!tokens) {
       throw new NotFoundException('Token not found or has been expired');
+    } else {
+      await this.tokens.remove(tokens);
+      return { message: 'Email verified successfully' };
     }
-    return { message: 'Email verified successfully' };
   }
 }
