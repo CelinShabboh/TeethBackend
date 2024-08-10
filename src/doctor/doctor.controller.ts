@@ -50,9 +50,12 @@ export class DoctorController {
   }
 
   @Delete('delete/:id')
-  async deleteUser(@Param('id') userId: number): Promise<any> {
-    return this.doctorService.deleteUser(userId);
+  async deleteDoctor(
+    @Param('id') doctorId: number,
+  ): Promise<{ message: string }> {
+    return this.doctorService.deleteDoctor(doctorId);
   }
+  
   @UseGuards(JwtGuard)
   @Post('findUsersInSameGovernorate')
   async findUsersInSameGovernorate(@Request() req) {

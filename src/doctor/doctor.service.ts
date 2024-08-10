@@ -206,9 +206,9 @@ export class DoctorService {
     }
   }
 
-  async deleteUser(id: number): Promise<any> {
-    const result = await this.doctorRepository.delete(id);
-    return {message: 'تم حذف الحساب بنجاح'};
+  async deleteDoctor(id: number): Promise<{ message: string }> {
+    await this.doctorRepository.delete(id);
+    return { message: ' تم حذف الحساب بنجاح' };
   }
   async findMatchingUsersInSameGobernorate(userId: number) {
     const doctor = await this.doctorRepository.findOne({

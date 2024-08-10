@@ -364,8 +364,8 @@ export class UserService {
     return { image_url: newImage.photo };
   }
 
-  async deleteUser(id: number): Promise<any> {
-    const result = await this.userRepository.delete(id);
-    return {message: 'تم حذف الحساب بنجاح'};
+  async deleteUser(id: number): Promise<{ message: string }> {
+    await this.userRepository.delete(id);
+    return { message: ' تم حذف الحساب بنجاح' };
   }
 }
