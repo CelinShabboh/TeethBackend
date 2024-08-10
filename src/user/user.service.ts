@@ -366,6 +366,6 @@ export class UserService {
 
   async deleteUser(id: number): Promise<any> {
     const result = await this.userRepository.delete(id);
-    return result;
+    return {message: 'تم حذف الحساب بنجاح'};
   }
 }
