@@ -55,7 +55,7 @@ export class AuthService {
   async login(user: User) {
     const user_info = {
       id: user.id,
-      username: user.name,
+      name: user.name,
       phone: user.phone,
       governorate: user.governorate,
     };
