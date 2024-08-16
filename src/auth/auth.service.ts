@@ -71,7 +71,7 @@ export class AuthService {
   async signin(doctor: Doctor) {
     const doctor_info = {
       id: doctor.id,
-      username: doctor.name,
+      name: doctor.name,
       email: doctor.email,
       phone: doctor.phone,
       governorate: doctor.governorate,
