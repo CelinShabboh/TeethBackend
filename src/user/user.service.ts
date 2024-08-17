@@ -47,14 +47,12 @@ export class UserService {
   async create(createUserDto: CreateUserDto): Promise<{ message: string }> {
     const { name, phone } = createUserDto;
 
-    // بداية المعاملة
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      // تنفيذ استعلام قاعدة البيانات الخام
       const conflictQuery = `
           SELECT 1 FROM users WHERE name = $1 OR phone = $2
           UNION
@@ -138,13 +136,11 @@ export class UserService {
     return userSessionDTO;
   }
   async deleteUserSession(userSessionId: number): Promise<void> {
-    // نبدأ المعاملة
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      // الحصول على جلسة الطبيب والتأكد من ملكية الطبيب لها
       const session = await queryRunner.manager.findOne(UserSession, {
         where: {
           id: userSessionId,
@@ -156,24 +152,19 @@ export class UserService {
         throw new NotFoundException('لم يتم العثور على جلسة الطبيب المطلوبة.');
       }
 
-      // حذف حالات الطبيب المرتبطة بالجلسة
       await queryRunner.manager.delete(UserCondition, {
         session: { id: session.id },
       });
 
-      // حذف جلسة الطبيب نفسها
       await queryRunner.manager.delete(UserSession, {
         id: session.id,
       });
 
-      // إذا كل شيء سار كما يجب، نُكمل المعاملة ونحفظ التغييرات
       await queryRunner.commitTransaction();
     } catch (err) {
-      // إذا حدث خطأ، نتراجع عن التغييرات
       await queryRunner.rollbackTransaction();
       throw err;
     } finally {
-      // في نهاية عمل المعاملة (سواء تم الإلتزام أو التراجع)، نُغلق الاتصال
       await queryRunner.release();
     }
   }
@@ -192,7 +183,6 @@ export class UserService {
       (acc, cur) => {
         if (cur && cur.condition) {
           acc[0].push(cur.condition.id);
-          // استخدم null بدلا من 'none'
           acc[1].push(cur.level ? cur.level.id : null);
         }
         return acc;
@@ -209,30 +199,24 @@ export class UserService {
         governorate: user.governorate,
       });
 
-    // فحص الحالات حيث level_id معرف
-    // يجب التأكد من أن أسلوب التعامل مع قيم 'none' مناسب لحالتك وعلى حسب كيفية تخزين البيانات في قاعدة البيانات.
     if (conditionId.length > 0) {
       doctorsQuery.andWhere(
         '(condition.id IN (:...conditionId) AND (conditionLevel.id IN (:...levelId) OR conditionLevel.id IS NULL))',
         {
           conditionId,
-          levelId: levelId.filter((id) => id !== 'none'), // تجنب إرسال 'none' إلى الاستعلام
+          levelId: levelId.filter((id) => id !== 'none'), 
         },
       );
     }
 
     const doctors = await doctorsQuery.getMany();
 
-    // إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
     const uniqueDoctors = doctors.reduce((acc, currentDoctor) => {
-      // إيجاد مؤشر الطبيب في المصفوفة المتراكمة
       const existingDoctorIndex = acc.findIndex(
         (doc) => doc.id === currentDoctor.id,
       );
 
-      // إذا كان الطبيب موجودًا بالفعل، قم بإضافة الحالات الجديدة إليه
       if (existingDoctorIndex > -1) {
-        // دمج الحالات الجديدة مع الحالات الحالية للطبيب باستخدام spread operator
         acc[existingDoctorIndex].conditions = [
           ...new Set([
             ...acc[existingDoctorIndex].conditions,
@@ -240,7 +224,6 @@ export class UserService {
           ]),
         ];
       } else {
-        // إذا لم يكن الطبيب موجودًا، قم بإضافته
         acc.push(currentDoctor);
       }
       return acc;
@@ -266,7 +249,6 @@ export class UserService {
       (acc, cur) => {
         if (cur && cur.condition) {
           acc[0].push(cur.condition.id);
-          // استخدم null بدلا من 'none'
           acc[1].push(cur.level ? cur.level.id : null);
         }
         return acc;
@@ -283,30 +265,24 @@ export class UserService {
         selectedGovernorate,
       });
 
-    // فحص الحالات حيث level_id معرف
-    // يجب التأكد من أن أسلوب التعامل مع قيم 'none' مناسب لحالتك وعلى حسب كيفية تخزين البيانات في قاعدة البيانات.
     if (conditionId.length > 0) {
       doctorsQuery.andWhere(
         '(condition.id IN (:...conditionId) AND (conditionLevel.id IN (:...levelId) OR conditionLevel.id IS NULL))',
         {
           conditionId,
-          levelId: levelId.filter((id) => id !== 'none'), // تجنب إرسال 'none' إلى الاستعلام
+          levelId: levelId.filter((id) => id !== 'none'), 
         },
       );
     }
 
     const doctors = await doctorsQuery.getMany();
 
-    // إعادة تنظيم بيانات الأطباء لضمان عرض جميع الحالات لكل طبيب
     const uniqueDoctors = doctors.reduce((acc, currentDoctor) => {
-      // إيجاد مؤشر الطبيب في المصفوفة المتراكمة
       const existingDoctorIndex = acc.findIndex(
         (doc) => doc.id === currentDoctor.id,
       );
 
-      // إذا كان الطبيب موجودًا بالفعل، قم بإضافة الحالات الجديدة إليه
       if (existingDoctorIndex > -1) {
-        // دمج الحالات الجديدة مع الحالات الحالية للطبيب باستخدام spread operator
         acc[existingDoctorIndex].conditions = [
           ...new Set([
             ...acc[existingDoctorIndex].conditions,
@@ -314,7 +290,6 @@ export class UserService {
           ]),
         ];
       } else {
-        // إذا لم يكن الطبيب موجودًا، قم بإضافته
         acc.push(currentDoctor);
       }
       return acc;
